@@ -11,7 +11,7 @@ echo $5 > /root/config/webhookPw.txt
 echo $6 > /root/config/provider.txt
 echo $7 > /root/config/region.txt
 echo "available" > /root/config/teardownState.txt
-# openssl req -x509 -newkey ed25519 -keyout /root/config/key.key -outform PEM -out /root/config/cert.pem -days 365 -nodes -subj "/C=DE/ST=NW/L=Muenster/O=Univeristy of Muenster/OU=NetSec Group/CN=$(cat /etc/hostname)"
+openssl req -x509 -newkey ed25519 -keyout /root/config/key.key -outform PEM -out /root/config/cert.pem -days 365 -nodes -subj "/C=DE/ST=NW/L=Muenster/O=Univeristy of Muenster/OU=NetSec Group/CN=$(cat /etc/hostname)"
 
 #   PACKAGES
 export DEBIAN_FRONTEND=noninteractive
