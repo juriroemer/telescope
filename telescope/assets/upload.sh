@@ -56,7 +56,7 @@ if [ ! -d "$dir_thorny" ]; then
 else
     cd $dir_thorny
     for file in *.jsonl; do
-        target="tupload/${bucket}/provider=${provider}/region=${region}/ip=${ip}"
+        target="tupload/${bucket}/provider=${provider}/region=${region}/ip=${ip}/thorny"
 
         mc cp "${file}" "$target/"
     done
@@ -72,7 +72,7 @@ if [ ! -d "$dir_zeek" ]; then
 else
     cd $dir_zeek
     for file in *.log; do
-        target="tupload/${bucket}/provider=${provider}/region=${region}/ip=${ip}"
+        target="tupload/${bucket}/provider=${provider}/region=${region}/ip=${ip}/zeek"
 
         mc cp "${file}" "$target/"
     done
