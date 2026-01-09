@@ -96,7 +96,7 @@ if [ ! -d "$dir_tls" ]; then
 
 else
     cd $dir_tls
-    for file in *.; do
+    for file in *; do
         target="tupload/${bucket}/provider=${provider}/region=${region}/ip=${ip}/tls"
 
         mc cp "${file}" "$target/"
