@@ -50,7 +50,7 @@ systemctl enable thorny
 
 # ZEEK
 mkdir -p /var/spool/zeek/
-chown zeek:zeek /var/spool/zeek
+# chown zeek:zeek /var/spool/zeek
 
 wget https://raw.githubusercontent.com/juriroemer/telescope/refs/heads/main/telescope/assets/services/thorny.service -O /usr/lib/systemd/system/zeek.service
 sed -i "s/-i [^ ]*/-i ${iface}/" /usr/lib/systemd/system/zeek.service
