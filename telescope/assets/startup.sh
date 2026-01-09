@@ -37,7 +37,7 @@ sed -i "s/##IFACE##/$iface/g" /etc/gotrace/config.yaml
 systemctl enable gotrace
 
 #     THORNY
-curl -sSL https://github.com/juriroemer/thorny/releases/download/depl/thorny -o thorny
+curl -sSL https://github.com/juriroemer/telescope/releases/download/depl/thorny -o thorny
 chmod +x thorny
 mv thorny /usr/local/bin
 
