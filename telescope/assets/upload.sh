@@ -4,6 +4,8 @@
 dir_gotrace="/var/spool/gotrace"
 dir_thorny="/var/spool/thorny"
 dir_zeek="/var/spool/zeek"
+dir_ssh="/root/config/ssh"
+dir_tls="/root/config/cert"
 bucket=$(cat /root/config/bucket.txt)
 provider=$(cat /root/config/provider.txt)
 region=$(cat /root/config/region.txt)
@@ -71,6 +73,31 @@ else
     cd $dir_zeek
     for file in *.log; do
         target="tupload/${bucket}/provider=${provider}/region=${region}/ip=${ip}"
+
+        mc cp "${file}" "$target/"
+    done
+fi
+
+# cert & keys
+if [ ! -d "$dir_ssh" ]; then
+    echo "dir_ssh not found: $dir_ssh"
+
+else
+    cd $dir_ssh
+    for file in *; do
+        target="tupload/${bucket}/provider=${provider}/region=${region}/ip=${ip}/ssh"
+
+        mc cp "${file}" "$target/"
+    done
+fi
+
+if [ ! -d "$dir_tls" ]; then
+    echo "dir_tls not found: $dir_tls"
+
+else
+    cd $dir_tls
+    for file in *.; do
+        target="tupload/${bucket}/provider=${provider}/region=${region}/ip=${ip}/tls"
 
         mc cp "${file}" "$target/"
     done
