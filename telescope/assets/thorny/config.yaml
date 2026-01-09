@@ -5,7 +5,7 @@ network:
 logging:
   snaplen: 1500
   packetsperlogfile: 10
-  log_dir: '/var/spool/thorny'
+  logDir: '/var/spool/thorny'
 tls:
   organization: 'Uni Muenster'
   country: 'Germany'
@@ -16,7 +16,7 @@ tls:
   commonName: 'Uni Muenster'
   dnsNames:
     - 'nsec.uni-muenster.de'
-  daysValid: 4
+  daysValid: 31
   certPath: '/root/config/cert/cert.pem'
   keyPath: '/root/config/cert/key.pem'
 

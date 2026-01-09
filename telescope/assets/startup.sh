@@ -21,7 +21,7 @@ apt install tcpdump curl unzip tcpreplay -y
 echo 'deb https://download.opensuse.org/repositories/security:/zeek/xUbuntu_24.04/ /' | sudo tee /etc/apt/sources.list.d/security:zeek.list
 curl -fsSL https://download.opensuse.org/repositories/security:zeek/xUbuntu_24.04/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/security_zeek.gpg > /dev/null
 apt update -y
-apt install zeek-7.0 -y
+apt install zeek-lts -y
 
 #     GOTRACE
 curl -sSL https://zivgitlab.uni-muenster.de/nkempen/gotrace/-/jobs/artifacts/main/download?job=build -o gotrace.zip
@@ -63,7 +63,7 @@ systemctl enable zeek
 wget https://raw.githubusercontent.com/juriroemer/telescope/refs/heads/main/telescope/assets/services/webhook.service -O /usr/lib/systemd/system/webhook.service
 wget https://raw.githubusercontent.com/juriroemer/telescope/refs/heads/main/telescope/assets/services/webhook.socket -O /usr/lib/systemd/system/webhook.socket
 
-#   mkdir -p /var/scripts
+mkdir -p /var/scripts
 wget https://raw.githubusercontent.com/juriroemer/telescope/refs/heads/main/telescope/assets/upload.sh -O /var/scripts/upload.sh
 wget https://raw.githubusercontent.com/juriroemer/telescope/refs/heads/main/telescope/assets/services/teardown.sh -O /var/scripts/teardown.sh
 wget https://raw.githubusercontent.com/juriroemer/telescope/refs/heads/main/telescope/assets/services/ping.sh -O /var/scripts/ping.sh
