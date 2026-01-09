@@ -9,23 +9,23 @@ echo $5 > /root/config/webhookPw.txt
 echo $6 > /root/config/provider.txt
 echo $7 > /root/config/region.txt
 echo "available" > /root/config/teardownState.txt
-openssl req -x509 -newkey ed25519 -keyout /root/config/key.key -outform PEM -out /root/config/cert.pem -days 365 -nodes -subj "/C=DE/ST=NW/L=Muenster/O=Univeristy of Muenster/OU=NetSec Group/CN=$(cat /etc/hostname)"
+# openssl req -x509 -newkey ed25519 -keyout /root/config/key.key -outform PEM -out /root/config/cert.pem -days 365 -nodes -subj "/C=DE/ST=NW/L=Muenster/O=Univeristy of Muenster/OU=NetSec Group/CN=$(cat /etc/hostname)"
 
+#   PACKAGES
 export DEBIAN_FRONTEND=noninteractive
 apt update -y
 apt install tcpdump curl unzip tcpreplay -y
-#apt upgrade -y
+apt upgrade -y
+echo 'deb https://download.opensuse.org/repositories/security:/zeek/xUbuntu_22.04/ /' | sudo tee /etc/apt/sources.list.d/security:zeek.list
+curl -fsSL https://download.opensuse.org/repositories/security:zeek/xUbuntu_22.04/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/security_zeek.gpg > /dev/null
+sudo apt install zeek-7.0 -y
 
-# Install Corsaro
-#curl https://pkg.caida.org/os/ubuntu/bootstrap.sh | bash
-#sudo apt install -y corsaro
-#wget https://raw.githubusercontent.com/thisni1s/script-store/refs/heads/main/telescope/corsaro.conf -O /etc/corsaro.conf
-#wget https://raw.githubusercontent.com/thisni1s/script-store/refs/heads/main/telescope/corsaro.service -P /usr/lib/systemd/system
-
+#     GOTRACE
 curl -sSL https://zivgitlab.uni-muenster.de/nkempen/gotrace/-/jobs/artifacts/main/download?job=build -o gotrace.zip
 unzip -o gotrace.zip
 chmod +x gotrace
 mv gotrace /usr/local/bin
+
 
 mkdir -p /etc/gotrace
 mkdir -p /var/spool/gotrace
@@ -36,21 +36,43 @@ iface=$(ip route show default | awk '{print $5}')
 sed -i "s/##IFACE##/$iface/g" /etc/gotrace/config.yaml
 systemctl enable gotrace
 
-wget https://raw.githubusercontent.com/thisni1s/telescope/refs/heads/main/telescope/assets/services/webhook.service -O /usr/lib/systemd/system/webhook.service
-wget https://raw.githubusercontent.com/thisni1s/telescope/refs/heads/main/telescope/assets/services/webhook.socket -O /usr/lib/systemd/system/webhook.socket
+#     THORNY
+curl -sSL https://github.com/juriroemer/thorny/releases/download/depl/thorny -o thorny
+chmod +x thorny
+mv thorny /usr/local/bin
 
-mkdir -p /var/scripts
-wget https://raw.githubusercontent.com/thisni1s/telescope/refs/heads/main/telescope/assets/upload.sh -O /var/scripts/upload.sh
-wget https://raw.githubusercontent.com/thisni1s/telescope/refs/heads/main/telescope/assets/services/teardown.sh -O /var/scripts/teardown.sh
-wget https://raw.githubusercontent.com/thisni1s/telescope/refs/heads/main/telescope/assets/services/ping.sh -O /var/scripts/ping.sh
-wget https://raw.githubusercontent.com/thisni1s/telescope/refs/heads/main/telescope/assets/services/restart.sh -O /var/scripts/restart.sh
-wget https://raw.githubusercontent.com/thisni1s/telescope/refs/heads/main/telescope/assets/services/status.sh -O /var/scripts/status.sh
-wget https://raw.githubusercontent.com/thisni1s/telescope/refs/heads/main/telescope/assets/services/redeploy.sh -O /var/scripts/redeploy.sh
-wget https://raw.githubusercontent.com/thisni1s/telescope/refs/heads/main/telescope/assets/services/rewrite.sh -O /var/scripts/rewrite.sh
+mkdir -p /etc/thorny 
+mkdir -p /var/spool/thorny
+wget https://raw.githubusercontent.com/juriroemer/telescope/refs/heads/main/telescope/assets/services/thorny.service -O /usr/lib/systemd/system/thorny.service
+wget https://raw.githubusercontent.com/juriroemer/telescope/refs/heads/main/telescope/assets/thorny/config.yaml -O /etc/thorny/config.yaml
+
+systemctl enable thorny
+
+# ZEEK
+mkdir -p /var/spool/zeek/
+chown zeek:zeek /var/spool/zeek
+
+wget https://raw.githubusercontent.com/juriroemer/telescope/refs/heads/main/telescope/assets/services/thorny.service -O /usr/lib/systemd/system/zeek.service
+sed -i "s/-i [^ ]*/-i ${iface}/" /usr/lib/systemd/system/zeek.service
+systemctl enable zeek
+
+#   WEBHOOK STUFF
+wget https://raw.githubusercontent.com/juriroemer/telescope/refs/heads/main/telescope/assets/services/webhook.service -O /usr/lib/systemd/system/webhook.service
+wget https://raw.githubusercontent.com/juriroemer/telescope/refs/heads/main/telescope/assets/services/webhook.socket -O /usr/lib/systemd/system/webhook.socket
+
+#   mkdir -p /var/scripts
+wget https://raw.githubusercontent.com/juriroemer/telescope/refs/heads/main/telescope/assets/upload.sh -O /var/scripts/upload.sh
+wget https://raw.githubusercontent.com/juriroemer/telescope/refs/heads/main/telescope/assets/services/teardown.sh -O /var/scripts/teardown.sh
+wget https://raw.githubusercontent.com/juriroemer/telescope/refs/heads/main/telescope/assets/services/ping.sh -O /var/scripts/ping.sh
+wget https://raw.githubusercontent.com/juriroemer/telescope/refs/heads/main/telescope/assets/services/restart.sh -O /var/scripts/restart.sh
+wget https://raw.githubusercontent.com/juriroemer/telescope/refs/heads/main/telescope/assets/services/status.sh -O /var/scripts/status.sh
+wget https://raw.githubusercontent.com/juriroemer/telescope/refs/heads/main/telescope/assets/services/redeploy.sh -O /var/scripts/redeploy.sh
+wget https://raw.githubusercontent.com/juriroemer/telescope/refs/heads/main/telescope/assets/services/rewrite.sh -O /var/scripts/rewrite.sh
 chmod +x /var/scripts/*
 
-wget https://raw.githubusercontent.com/thisni1s/telescope/refs/heads/main/telescope/assets/services/webhook.json -O /etc/webhook.json
+wget https://raw.githubusercontent.com/juriroemer/telescope/refs/heads/main/telescope/assets/services/webhook.json -O /etc/webhook.json
 sed -i "s/##WHPW##/$5/g" /etc/webhook.json
+
 
 #Install Minio Client
 curl https://dl.min.io/client/mc/release/linux-amd64/mc \
@@ -61,15 +83,16 @@ chmod +x /minio-binaries/mc
 mv /minio-binaries/mc /usr/local/bin/
 
 # Install Webhook Server
-curl -L https://github.com/adnanh/webhook/releases/latest/download/webhook-linux-amd64.tar.gz -o webhook.tar.gz
-tar xf webhook.tar.gz
-mv webhook-linux-amd64/webhook /usr/local/bin/webhook
-rmdir webhook-linux-amd64
-rm webhook.tar.gz
-systemctl enable webhook.socket
-systemctl start webhook.socket
+   curl -L https://github.com/adnanh/webhook/releases/latest/download/webhook-linux-amd64.tar.gz -o webhook.tar.gz
+   tar xf webhook.tar.gz
+   mv webhook-linux-amd64/webhook /usr/local/bin/webhook
+   rmdir webhook-linux-amd64
+   rm webhook.tar.gz
+   systemctl enable webhook.socket
+   systemctl start webhook.socket
 
 # Change SSH Port, Ubuntu has socket based activation so it needs to be set like this
+
 mkdir -p /etc/systemd/system/ssh.socket.d
 cat >/etc/systemd/system/ssh.socket.d/listen.conf <<EOF
 [Socket]
@@ -114,27 +137,9 @@ systemctl disable systemd-resolved
 rm /etc/resolv.conf
 echo "nameserver 2001:4860:4860::8888" > /etc/resolv.conf
 
-if [ "$6" == "vultr" ]; then
-    # Disable ufw on vultr
-    ufw disable
-fi
-
-if [ "$7" = "us-central1" ] && [ "$6" = "gcp" ]; then
-  # ACCEPT rules to allow GCP healthchecks
-  # These rules take precedence over the complete DROP rules as they're added earlier
-  sudo iptables -A INPUT -i "$iface" -s 35.191.0.0/16 -p tcp --dport 28763 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
-  sudo iptables -A INPUT -i "$iface" -s 209.85.152.0/22 -p tcp --dport 28763 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
-  sudo iptables -A INPUT -i "$iface" -s 209.85.204.0/22 -p tcp --dport 28763 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
-
-  sudo iptables -A OUTPUT -o "$iface" -d 35.191.0.0/16 -p tcp --sport 28763 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
-  sudo iptables -A OUTPUT -o "$iface" -d 209.85.152.0/22 -p tcp --sport 28763 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
-  sudo iptables -A OUTPUT -o "$iface" -d 209.85.204.0/22 -p tcp --sport 28763 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
-fi
-
-# Drop inbound and outbound ipv4 traffic, we want to be completely silent.
-sudo iptables -A INPUT -i "$iface" -j DROP
-sudo iptables -A OUTPUT -o "$iface" -j DROP
 
 systemctl daemon-reload
 systemctl restart ssh.socket
 systemctl start gotrace
+systemctl start thorny
+systemctl start zeek
